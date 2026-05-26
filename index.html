@@ -874,6 +874,12 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
           📲 Установить приложение
         </button>
 
+        <!-- Кнопка обновления приложения -->
+        <button onclick="forceUpdate()" id="update-btn" style="width:100%;padding:13px;margin-top:8px;background:rgba(255,255,255,0.04);border:1px solid var(--bd2);border-radius:12px;color:var(--mu);font-family:var(--serif);font-size:13px;cursor:pointer">
+          🔄 Проверить обновления
+        </button>
+        <div id="update-status" style="text-align:center;font-size:11px;color:var(--hi);margin-top:4px;min-height:16px"></div>
+
         <!-- ═══ УВЕДОМЛЕНИЯ ═══ -->
         <div class="stit" style="margin-top:18px">🔔 Уведомления</div>
         <div class="scard" style="padding:0">
@@ -1363,6 +1369,8 @@ function startApp(){
   R('app').classList.add('on');
   setStrat(U().strat||'cons');
   updateAll();buildRecs();buildProj();buildPlans();initPP();updateAiCnt();
+  // Исправляем старые значения счётчиков AI
+  setTimeout(fixAiCounters, 300);
   // Init EmailJS keys from admin config
   if(typeof initEmailJS==='function')setTimeout(initEmailJS,500);
   // Resume scheduled reminder if was active
@@ -1675,9 +1683,35 @@ var AI_Q={
   q3:function(){return MN[NOW.getMonth()]+' '+NOW.getFullYear()+'. Дивиденды LKOH,SBERP,PHOR — доходность, ближайшие отсечки. Коротко.';},
   q4:function(){return 'Ключевая ставка ЦБ РФ сейчас, прогноз. Что лучше — ОФЗ-ПД или флоатеры? Коротко.';}
 };
-function aiLeft(){var lim=LIMITS[U().plan||'free'];return Math.max(0,lim.ai+(U().aiRollover||0)+(U().aiExtra||0)-(U().aiUsed||0));}
-function aiTotal(){var lim=LIMITS[U().plan||'free'];return lim.ai+(U().aiRollover||0)+(U().aiExtra||0);}
-function resetMonth(){var m=NOW.toISOString().slice(0,7);if(U().aiMonth!==m){var prev=aiLeft();var max=LIMITS[U().plan||'free'].ai;U().aiRollover=Math.min(prev,max);U().aiUsed=0;U().aiMonth=m;sU();}}
+function aiLeft(){
+  var lim=LIMITS[U().plan||'free'];
+  var rollover=Math.min(U().aiRollover||0, lim.ai); // rollover не может быть больше базового лимита
+  return Math.max(0,lim.ai+rollover+(U().aiExtra||0)-(U().aiUsed||0));
+}
+function aiTotal(){
+  var lim=LIMITS[U().plan||'free'];
+  var rollover=Math.min(U().aiRollover||0, lim.ai);
+  return lim.ai+rollover+(U().aiExtra||0);
+}
+function resetMonth(){
+  var m=NOW.toISOString().slice(0,7);
+  if(U().aiMonth!==m){
+    var prev=aiLeft();
+    var max=LIMITS[U().plan||'free'].ai;
+    U().aiRollover=Math.min(prev,max); // никогда не больше базового лимита
+    U().aiUsed=0;U().aiMonth=m;sU();
+  }
+}
+// Миграция: исправляем старые значения в localStorage
+function fixAiCounters(){
+  if(!curUser||!users[curUser])return;
+  var u=users[curUser];
+  var max=LIMITS[u.plan||'free'].ai;
+  var changed=false;
+  if((u.aiRollover||0)>max){u.aiRollover=0;changed=true;}
+  if((u.aiExtra||0)>200){u.aiExtra=0;changed=true;} // 200 — максимум купленных пакетов
+  if(changed){sv('ig_users',users);console.log('[Fix] AI счётчики исправлены');updateAiCnt();}
+}
 function updateAiCnt(){
   var plan=U().plan||'free';
   var badge=R('ai-badge'),cnt=R('ai-cnt');
@@ -2807,6 +2841,40 @@ function installApp() {
       if (btn) btn.style.display = 'none';
     }
     _installPrompt = null;
+  });
+}
+
+/* ── Принудительное обновление приложения ── */
+function forceUpdate(){
+  var btn=R('update-btn');
+  var st=R('update-status');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Проверяем...';}
+  if(st)st.textContent='';
+
+  if(!('serviceWorker' in navigator)){
+    if(btn){btn.disabled=false;btn.textContent='🔄 Проверить обновления';}
+    if(st){st.textContent='Обновите страницу вручную (F5)';st.style.color='var(--mu)';}
+    return;
+  }
+
+  // Удаляем все кэши
+  caches.keys().then(function(keys){
+    return Promise.all(keys.map(function(key){
+      return caches.delete(key);
+    }));
+  }).then(function(){
+    // Обновляем Service Worker
+    return navigator.serviceWorker.getRegistration();
+  }).then(function(reg){
+    if(reg)return reg.update();
+  }).then(function(){
+    if(btn){btn.textContent='✅ Обновлено!';}
+    if(st){st.textContent='Перезагружаем...';st.style.color='var(--green)';}
+    // Перезагружаем страницу через 1 секунду
+    setTimeout(function(){location.reload(true);},1000);
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.textContent='🔄 Проверить обновления';}
+    if(st){st.textContent='Ошибка. Обновите страницу вручную.';st.style.color='var(--red)';}
   });
 }
 
