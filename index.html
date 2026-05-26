@@ -1367,6 +1367,7 @@ function doConsent(){
 })();
 
 function startApp(){
+  adminCfg=lv('ig_admin',{key:''}); // перечитываем свежий ключ
   R('app').classList.add('on');
   setStrat(U().strat||'cons');
   updateAll();buildRecs();buildProj();buildPlans();initPP();updateAiCnt();
@@ -1759,7 +1760,7 @@ async function askAI(qid){
     R('up-txt').innerHTML='На тарифе '+U().plan+' '+LIMITS[plan].ai+' запросов/мес.<br>Обновится в следующем месяце или купи доп. пакет.';
     R('m-up').classList.add('on');return;
   }
-  var key=adminCfg.key;
+  var key=lv('ig_admin',{}).key||adminCfg.key||'';
   if(!key){toast('API не настроен. Обратитесь к администратору.');return;}
   aiLoading=true;
   switchTab('home');
@@ -1802,7 +1803,7 @@ function initPP(){
   };
 }
 async function askPP(){
-  var key=adminCfg.key;if(!key){toast('API не настроен');return;}
+  var key=lv('ig_admin',{}).key||adminCfg.key||'';if(!key){toast('API не настроен');return;}
   resetMonth();if(aiLeft()<=0){toast('Лимит запросов исчерпан');return;}
   var btn=R('pp-btn'),res=R('pp-res'),body=R('pp-res-body');
   btn.textContent='⏳ Составляем план...';btn.disabled=true;
@@ -1833,7 +1834,7 @@ async function askPremium(){
     R('m-up').classList.add('on');
     return;
   }
-  var key=adminCfg.key;if(!key){toast('API не настроен');return;}
+  var key=lv('ig_admin',{}).key||adminCfg.key||'';if(!key){toast('API не настроен');return;}
   var t=totals(),u=U();
   var ps=(u.purchases||[]).slice(-5).map(function(p){return p.name+' '+fM(p.sum)+(p.yield?' ('+p.yield+')':'')}).join('; ');
   toast('⭐ Анализируем портфель...');
@@ -2278,7 +2279,16 @@ function handlePlan(el){
   showConfirm('Подключить тариф '+names[id],
     price>0?(price.toLocaleString('ru-RU')+' ₽/мес. Оплата подключается в следующей версии.'):'Перейти на бесплатный тариф?',
     price>0?'Подключить':'Перейти',
-    function(){U().plan=id;sU();buildPlans();buildProfile();toast('Тариф '+names[id]+' выбран');});
+    function(){
+      U().plan=id;
+      sU();
+      buildPlans();
+      buildProfile();
+      updateAll();   // обновляет бейдж тарифа в шапке
+      initPP();      // обновляет видимость блоков PRO/Premium
+      fixAiCounters(); // сбрасывает счётчик под новый тариф
+      toast('✅ Тариф '+names[id]+' выбран');
+    });
 }
 
 function oed(field,title,type,ph){
@@ -2450,6 +2460,7 @@ async function saveAdmin(){
   if(!ok){toast('Неверный пароль');return;}
   if(key&&!key.startsWith('sk-ant-')){toast('Ключ должен начинаться с sk-ant-');return;}
   var cfg=lv('ig_admin',{});cfg.key=key;sv('ig_admin',cfg);
+  adminCfg=cfg; // обновляем глобальную переменную
   toast('✓ API ключ сохранён');
   setTimeout(function(){var mo=R('m-admin');if(mo)mo.classList.remove('on');},1500);
 }
