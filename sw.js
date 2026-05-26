@@ -13,9 +13,8 @@
    Если в корне домена (например investgid.ru):
      BASE_PATH = ''
    ─────────────────────────────────────────────── */
-const BASE_PATH = '/investgid'; // ← поменяй если нужно
-
-const CACHE_NAME = 'investgid-v1';
+const BASE_PATH = '/investgid';
+const CACHE_NAME = 'investgid-v2';
 
 const CACHE_FILES = [
   BASE_PATH + '/',
