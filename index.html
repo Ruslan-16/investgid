@@ -891,6 +891,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
               <div>
                 <div style="font-size:13px;font-weight:600">📲 Напоминание о взносе</div>
                 <div style="font-size:11px;color:var(--mu);margin-top:2px">Push на телефон в выбранный день</div>
+                <div id="ios-notif-hint" style="display:none;font-size:10px;color:#F7B731;margin-top:4px">⚠️ iPhone: сначала добавь на экран «Домой»</div>
               </div>
               <!-- Toggle switch -->
               <div id="notif-toggle" onclick="togglePushNotif()" style="width:44px;height:24px;border-radius:12px;background:var(--bd2);position:relative;cursor:pointer;transition:.3s;flex-shrink:0">
@@ -951,7 +952,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
               <div style="font-size:10px;color:var(--hi);margin-bottom:5px;text-transform:uppercase">Email для уведомлений</div>
               <div style="display:flex;gap:8px">
                 <input id="notif-email" type="email" placeholder="your@email.com" style="flex:1;padding:8px 12px;background:var(--sf);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:13px;font-family:var(--serif)">
-                <button onclick="sendTestEmail()" style="padding:8px 14px;background:rgba(0,212,100,0.1);border:1px solid rgba(0,212,100,0.3);border-radius:8px;color:#00D4AA;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Тест</button>
               </div>
               <div style="font-size:10px;color:var(--mu);margin-top:6px">Письмо придёт в тот же день, что и push-уведомление</div>
               <div id="email-status" style="font-size:11px;margin-top:6px;text-align:center"></div>
@@ -1954,6 +1954,8 @@ async function autoLookupAsset(name,qty){
 }
 function closeAdd(){
   R('m-add').classList.remove('on');
+  delete R('m-add').dataset.editId;
+  var title=R('m-add-title');if(title)title.textContent='Добавить актив';
   ['m-name','m-qty','m-price','m-sum','m-yld'].forEach(function(id){var el=R(id);if(el)el.value='';});
   var tip=R('yld-tip');if(tip)tip.textContent='Введи название и количество — AI найдёт данные автоматически';
   var hint=R('yld-hint');if(hint)hint.textContent='';
@@ -1993,7 +1995,22 @@ function savePurch(){
       price:price||null,
       yield:yldEl?yldEl.value.trim():''
     };
-    ps.push(entry);
+    // Проверяем режим редактирования
+    var editId=R('m-add').dataset.editId;
+    if(editId){
+      // Редактирование — заменяем существующий актив
+      var idx=ps.findIndex(function(x){return x.id==editId;});
+      if(idx>=0){
+        entry.id=ps[idx].id; // сохраняем оригинальный id
+        entry.date=ps[idx].date; // сохраняем оригинальную дату
+        ps[idx]=entry;
+      }
+      delete R('m-add').dataset.editId;
+      var title=R('m-add-title');if(title)title.textContent='Добавить актив';
+    } else {
+      // Новый актив
+      ps.push(entry);
+    }
     U().purchases=ps;
     sU();
     // Close modal + reset form
@@ -2041,13 +2058,40 @@ function buildJournal(){
       +'<div class="jitem-mt">'+p.date+' · '+p.acc+(p.yield?' · '+p.yield+'%':'')+'</div></div>'
       +'<div class="jitem-r"><div class="jitem-sum">'+fmt(p.sum)+'</div>'
       +(inc>0?'<div class="jitem-yld">~'+fM(inc)+'/мес</div>':'')+'</div>'
-      +'<span class="jdel" onclick="delP('+p.id+')">✕</span></div>';
+      +'<div style="display:flex;flex-direction:column;gap:4px;margin-left:4px">'
+      +'<span onclick="editP('+p.id+')" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:rgba(108,143,255,0.1);border:1px solid rgba(108,143,255,0.2);border-radius:7px;cursor:pointer;font-size:12px">✏️</span>'
+      +'<span class="jdel" onclick="delP('+p.id+')" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;margin:0">✕</span>'
+      +'</div></div>';
   }).join('');
 }
 
 function delP(id){
   U().purchases=(U().purchases||[]).filter(function(p){return p.id!==id});
   sU();buildJournal();updateAll();toast('Запись удалена');
+}
+
+function editP(id){
+  var ps=U().purchases||[];
+  var p=ps.find(function(x){return x.id===id;});
+  if(!p)return;
+  // Заполняем форму добавления данными актива
+  var nameEl=R('add-name'),sumEl=R('add-sum'),qtyEl=R('add-qty');
+  var priceEl=R('add-price'),yldEl=R('add-yld');
+  var typeEl=R('add-type'),accEl=R('add-acc');
+  if(nameEl)nameEl.value=p.name||'';
+  if(sumEl)sumEl.value=p.sum||'';
+  if(qtyEl)qtyEl.value=p.qty||'';
+  if(priceEl)priceEl.value=p.price||'';
+  if(yldEl)yldEl.value=p.yield||'';
+  if(typeEl)typeEl.value=p.type||'ofz';
+  if(accEl)accEl.value=p.acc||'ИИС';
+  // Сохраняем id редактируемого актива
+  R('m-add').dataset.editId=id;
+  // Меняем заголовок модалки
+  var title=R('m-add-title');
+  if(title)title.textContent='Редактировать актив';
+  // Открываем модалку
+  R('m-add').classList.add('on');
 }
 
 function buildAnalytics(){
@@ -2871,7 +2915,14 @@ function checkGoalAchieved() {
   }
 }
 
-/* ── Кнопка «Установить приложение» (A2HS) ── */
+/* ── iOS определение ── */
+var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+var isInStandaloneMode=window.navigator.standalone===true;
+// Показываем подсказку для iOS
+(function(){
+  var hint=document.getElementById('ios-notif-hint');
+  if(hint&&isIOS&&!isInStandaloneMode)hint.style.display='block';
+})();
 var _installPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
