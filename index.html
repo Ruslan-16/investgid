@@ -2632,11 +2632,49 @@ function adminTab(tab){
 }
 function adUsers(){
   var ul=R('adp-users');if(!ul)return;
-  var users=lv('ig_users',{});var pn={free:'Бесплатно',base:'Старт',pro:'Про',premium:'Премиум'};
-  ul.innerHTML=Object.keys(users).length?Object.keys(users).map(function(e){var u=users[e];
-    return '<div style="padding:8px 0;border-bottom:1px solid var(--bd)"><div style="font-size:12px;font-weight:500">'+e+'</div>'
-      +'<div style="font-size:10px;color:var(--hi)">'+(u.name||'—')+' · '+(pn[u.plan||'free'])+'</div></div>';
-  }).join(''):'<div style="text-align:center;padding:16px;color:var(--hi);font-size:12px">Нет пользователей</div>';
+  var pn={free:'Бесплатно',base:'Старт',pro:'Про',premium:'Премиум'};
+
+  // Показываем локальных пока загружаем из Firebase
+  var localUsers=lv('ig_users',{});
+  function renderUsers(allUsers){
+    var keys=Object.keys(allUsers);
+    ul.innerHTML=keys.length?keys.map(function(e){
+      var u=allUsers[e];
+      var plan=pn[u.plan||'free'];
+      var planColor={free:'color:var(--mu)',base:'color:#6B9FFF',pro:'color:var(--green)',premium:'color:#FFD000'}[u.plan||'free']||'';
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--bd)">'
+        +'<div style="font-size:12px;font-weight:600">'+e+'</div>'
+        +'<div style="display:flex;justify-content:space-between;margin-top:3px">'
+        +'<span style="font-size:11px;color:var(--hi)">'+(u.name||'—')+'</span>'
+        +'<span style="font-size:11px;font-weight:700;'+planColor+'">'+plan+'</span>'
+        +'</div>'
+        +(u.consentDate?'<div style="font-size:10px;color:var(--mu);margin-top:2px">Рег: '+new Date(u.consentDate).toLocaleDateString('ru-RU')+'</div>':'')
+        +'</div>';
+    }).join(''):'<div style="text-align:center;padding:16px;color:var(--hi);font-size:12px">Нет пользователей</div>';
+  }
+
+  // Сначала рендерим локальных
+  renderUsers(localUsers);
+
+  // Затем загружаем всех из Firebase
+  if(fbDb){
+    ul.innerHTML='<div style="text-align:center;padding:16px;color:var(--hi);font-size:12px">⏳ Загружаем из облака...</div>';
+    fbDb.collection('users').get()
+      .then(function(snapshot){
+        var firebaseUsers={};
+        snapshot.forEach(function(doc){
+          var email=doc.id.replace(/_/g,'.');
+          firebaseUsers[email]=doc.data();
+        });
+        // Мержим с локальными
+        var allUsers=Object.assign({},localUsers,firebaseUsers);
+        renderUsers(allUsers);
+      })
+      .catch(function(e){
+        console.warn('[Admin] Firebase users error:',e);
+        renderUsers(localUsers); // fallback на локальные
+      });
+  }
 }
 function trackApiCall(model, label){
   var key='ig_api_log';
@@ -2656,63 +2694,80 @@ function trackApiCall(model, label){
 }
 function adApp(){
   var el=R('adp-stats');if(!el)return;
-  var users=lv('ig_users',{});
   var apiLog=lv('ig_api_log',[]);
-  var total=Object.keys(users).length;
-  var paid=Object.values(users).filter(function(u){return u.plan&&u.plan!=='free'}).length;
-  var byPlan={free:0,base:0,pro:0,premium:0};
-  Object.values(users).forEach(function(u){var p=u.plan||'free';if(byPlan[p]!==undefined)byPlan[p]++;});
 
-  // API stats
-  var today=new Date().toLocaleDateString('ru-RU');
-  var todayCalls=apiLog.filter(function(e){return e.date===today}).length;
-  var monthCalls=apiLog.filter(function(e){
-    var d=new Date(e.ts);var n=new Date();
-    return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();
-  }).length;
-  var totalCalls=apiLog.length;
+  function renderStats(allUsers){
+    var total=Object.keys(allUsers).length;
+    var paid=Object.values(allUsers).filter(function(u){return u.plan&&u.plan!=='free'}).length;
+    var byPlan={free:0,base:0,pro:0,premium:0};
+    Object.values(allUsers).forEach(function(u){var p=u.plan||'free';if(byPlan[p]!==undefined)byPlan[p]++;});
 
-  // Breakdown by model
-  var sonnetCalls=apiLog.filter(function(e){return e.model&&e.model.includes('sonnet')}).length;
-  var haikuCalls=apiLog.filter(function(e){return e.model&&e.model.includes('haiku')}).length;
+    // API stats
+    var today=new Date().toLocaleDateString('ru-RU');
+    var todayCalls=apiLog.filter(function(e){return e.date===today}).length;
+    var monthCalls=apiLog.filter(function(e){
+      var d=new Date(e.ts);var n=new Date();
+      return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();
+    }).length;
+    var totalCalls=apiLog.length;
+    var sonnetCalls=apiLog.filter(function(e){return e.model&&e.model.includes('sonnet')}).length;
+    var haikuCalls=apiLog.filter(function(e){return e.model&&e.model.includes('haiku')}).length;
+    var costSonnet=sonnetCalls*0.0095;
+    var costHaiku=haikuCalls*0.0016;
+    var costTotal=(costSonnet+costHaiku)*90;
 
-  // Cost estimate
-  var costSonnet=sonnetCalls*0.0095;
-  var costHaiku=haikuCalls*0.0016;
-  var costTotal=(costSonnet+costHaiku)*90; // in rub
+    el.innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+        +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Всего запросов</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--sc)">'+totalCalls+'</div></div>'
+        +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Сегодня</div><div style="font-family:var(--mono);font-size:22px;font-weight:700">'+todayCalls+'</div></div>'
+        +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">В этом месяце</div><div style="font-family:var(--mono);font-size:22px;font-weight:700">'+monthCalls+'</div></div>'
+        +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Расч. стоимость</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#F7B731">~'+Math.round(costTotal)+'₽</div></div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;line-height:1.9">'
+        +'<div style="font-weight:700;margin-bottom:6px;font-size:11px;text-transform:uppercase;color:var(--hi)">Модели</div>'
+        +'<div style="display:flex;justify-content:space-between"><span>Sonnet (AI-кнопки, планы)</span><span style="font-family:var(--mono)">'+sonnetCalls+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between"><span>Haiku (поиск активов, тест)</span><span style="font-family:var(--mono)">'+haikuCalls+'</span></div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;line-height:1.9">'
+        +'<div style="font-weight:700;margin-bottom:6px;font-size:11px;text-transform:uppercase;color:var(--hi)">Пользователи ('+total+')</div>'
+        +'<div style="display:flex;justify-content:space-between"><span>🆓 Бесплатный</span><span style="font-family:var(--mono)">'+byPlan.free+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between"><span>🚀 Старт</span><span style="font-family:var(--mono)">'+byPlan.base+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between"><span>💎 Про</span><span style="font-family:var(--mono)">'+byPlan.pro+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between"><span>⭐ Премиум</span><span style="font-family:var(--mono)">'+byPlan.premium+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd);padding-top:4px;margin-top:4px;color:var(--sc)"><span>Платных</span><span style="font-family:var(--mono)">'+paid+'</span></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--mu);font-weight:700;margin-bottom:6px">Последние запросы</div>'
+      +'<div style="max-height:140px;overflow-y:auto">'
+      +(apiLog.length?apiLog.slice(0,20).map(function(e){
+        return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">'
+          +'<span style="color:var(--hi)">'+e.time+' '+e.date+'</span>'
+          +'<span style="flex:1;text-align:center;color:var(--tx)">'+e.label+'</span>'
+          +'<span style="color:var(--mu)">'+e.user+'</span>'
+          +'</div>';
+      }).join(''):'<div style="text-align:center;color:var(--hi);padding:10px;font-size:11px">Запросов ещё нет</div>')
+      +'</div>'
+      +'<button onclick="if(confirm(\'Очистить историю API?\'))sv(\'ig_api_log\',[]);adApp();" style="width:100%;padding:8px;border:1px solid rgba(255,100,100,.2);border-radius:8px;background:transparent;color:rgba(255,100,100,.6);font-size:11px;cursor:pointer;margin-top:10px">🗑 Очистить историю</button>';
+  }
 
-  el.innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
-      +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Всего запросов</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--sc)">'+totalCalls+'</div></div>'
-      +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Сегодня</div><div style="font-family:var(--mono);font-size:22px;font-weight:700">'+todayCalls+'</div></div>'
-      +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">В этом месяце</div><div style="font-family:var(--mono);font-size:22px;font-weight:700">'+monthCalls+'</div></div>'
-      +'<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--hi);margin-bottom:4px;text-transform:uppercase">Расч. стоимость</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#F7B731">~'+Math.round(costTotal)+'₽</div></div>'
-    +'</div>'
-    +'<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;line-height:1.9">'
-      +'<div style="font-weight:700;margin-bottom:6px;font-size:11px;text-transform:uppercase;color:var(--hi)">Модели</div>'
-      +'<div style="display:flex;justify-content:space-between"><span>Sonnet (AI-кнопки, планы)</span><span style="font-family:var(--mono)">'+sonnetCalls+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between"><span>Haiku (поиск активов, тест)</span><span style="font-family:var(--mono)">'+haikuCalls+'</span></div>'
-    +'</div>'
-    +'<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;line-height:1.9">'
-      +'<div style="font-weight:700;margin-bottom:6px;font-size:11px;text-transform:uppercase;color:var(--hi)">Пользователи ('+total+')</div>'
-      +'<div style="display:flex;justify-content:space-between"><span>🆓 Бесплатный</span><span style="font-family:var(--mono)">'+byPlan.free+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between"><span>🚀 Старт</span><span style="font-family:var(--mono)">'+byPlan.base+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between"><span>💎 Про</span><span style="font-family:var(--mono)">'+byPlan.pro+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between"><span>⭐ Премиум</span><span style="font-family:var(--mono)">'+byPlan.premium+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--bd);padding-top:4px;margin-top:4px;color:var(--sc)"><span>Платных</span><span style="font-family:var(--mono)">'+paid+'</span></div>'
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--mu);font-weight:700;margin-bottom:6px">Последние запросы</div>'
-    +'<div style="max-height:140px;overflow-y:auto">'
-    +(apiLog.length?apiLog.slice(0,20).map(function(e){
-      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">'
-        +'<span style="color:var(--hi)">'+e.time+' '+e.date+'</span>'
-        +'<span style="flex:1;text-align:center;color:var(--tx)">'+e.label+'</span>'
-        +'<span style="color:var(--mu)">'+e.user+'</span>'
-        +'</div>';
-    }).join(''):'<div style="text-align:center;color:var(--hi);padding:10px;font-size:11px">Запросов ещё нет</div>')
-    +'</div>'
-    +'<button onclick="if(confirm(\'Очистить историю API?\'))sv(\'ig_api_log\',[]);adApp();" style="width:100%;padding:8px;border:1px solid rgba(255,100,100,.2);border-radius:8px;background:transparent;color:rgba(255,100,100,.6);font-size:11px;cursor:pointer;margin-top:10px">🗑 Очистить историю</button>';
+  // Сначала рендерим локальные данные
+  var localUsers=lv('ig_users',{});
+  renderStats(localUsers);
+
+  // Потом загружаем из Firebase
+  if(fbDb){
+    fbDb.collection('users').get()
+      .then(function(snapshot){
+        var firebaseUsers={};
+        snapshot.forEach(function(doc){
+          var email=doc.id.replace(/_/g,'.');
+          firebaseUsers[email]=doc.data();
+        });
+        renderStats(Object.assign({},localUsers,firebaseUsers));
+      })
+      .catch(function(e){console.warn('[Admin] stats error:',e);});
+  }
 }
+
 function adTest(){
   // Panel content with button already exists in HTML — just clear results
   var res=R('ad-test-r');
