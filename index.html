@@ -61,7 +61,36 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .ld-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));animation:fill 1.4s ease forwards}
 @keyframes fill{to{width:100%}}
 
-/* SCREENS (auth/consent) */
+/* ── Tooltips ── */
+.tt{position:relative}
+.tt-box{
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(20,30,25,0.97);
+  border:1px solid rgba(0,212,100,0.3);
+  border-radius:10px;
+  padding:8px 12px;
+  font-size:12px;
+  color:var(--tx);
+  white-space:nowrap;
+  z-index:9999;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .2s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  line-height:1.5;
+}
+.tt-box::after{
+  content:'';
+  position:absolute;
+  top:100%;left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:rgba(0,212,100,0.3);
+}
+.tt-box.show{opacity:1;}
 .screen{position:fixed;inset:0;background:linear-gradient(135deg,#0d1117 0%,#0d2e1a 40%,#1a3a0d 70%,#0f2a1a 100%);z-index:100;display:none;overflow-y:auto}
 .screen.on{display:block}
 .sw{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
@@ -591,6 +620,64 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 </div>
 </div>
 
+<!-- ONBOARDING SCREEN -->
+<div class="screen" id="scr-onboard" style="justify-content:center;padding:24px 20px;overflow-y:auto">
+  <div style="max-width:420px;width:100%;margin:0 auto">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#00D4AA,#0066FF);display:inline-flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;font-family:var(--serif);margin-bottom:14px">И</div>
+      <div style="font-family:var(--serif);font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">ИнвестГид</div>
+      <div style="color:var(--mu);font-size:14px;margin-top:6px">Твой помощник по инвестициям</div>
+    </div>
+
+    <!-- Steps -->
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:32px">
+      <div style="background:rgba(0,212,100,0.08);border:1px solid rgba(0,212,100,0.2);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">📒</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">Журнал покупок</div>
+          <div style="color:var(--mu);font-size:13px;line-height:1.5">Добавляй активы — ОФЗ, акции, фонды. Считай расчётный доход автоматически</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,102,255,0.08);border:1px solid rgba(0,102,255,0.2);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">🤖</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">AI-советы</div>
+          <div style="color:var(--mu);font-size:13px;line-height:1.5">Актуальные данные по ОФЗ, дивидендам и ставке ЦБ прямо в приложении</div>
+        </div>
+      </div>
+      <div style="background:rgba(247,183,49,0.08);border:1px solid rgba(247,183,49,0.2);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">📊</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">Аналитика</div>
+          <div style="color:var(--mu);font-size:13px;line-height:1.5">Следи за ростом портфеля, сравнивай с бенчмарком и строй прогнозы</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.15);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">🎯</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">Цель пассивного дохода</div>
+          <div style="color:var(--mu);font-size:13px;line-height:1.5">Поставь цель — например 150 000₽/мес — и следи как портфель к ней идёт</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- First step hint -->
+    <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:12px;padding:14px;margin-bottom:20px;text-align:center">
+      <div style="font-size:12px;color:var(--mu);margin-bottom:4px">С чего начать?</div>
+      <div style="font-size:14px;font-weight:600">Перейди в <span style="color:var(--green)">Журнал</span> и добавь первый актив 📒</div>
+    </div>
+
+    <button onclick="closeOnboard()" style="width:100%;padding:16px;background:linear-gradient(135deg,var(--green),#00A882);border:none;border-radius:14px;color:#000;font-family:var(--serif);font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em">
+      Начать →
+    </button>
+
+    <div style="text-align:center;margin-top:12px">
+      <span onclick="closeOnboard()" style="font-size:12px;color:var(--hi);cursor:pointer">Пропустить</span>
+    </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="app" id="app">
 
@@ -606,7 +693,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
         </div>
       </div>
       <div class="hdr-right">
-        <div class="ai-badge" id="ai-badge" onclick="switchTab('profile')">
+        <div class="ai-badge" id="ai-badge" onclick="switchTab('profile')" data-tip="Осталось AI-запросов в этом месяце">
           <div class="ai-dot"></div>
           <span class="ai-cnt" id="ai-cnt">—</span>
           <span style="color:var(--hi);font-size:10px">зап.</span>
@@ -987,10 +1074,10 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 
   <!-- TABS -->
   <div class="tabs">
-    <div class="tab on" id="tab-home" onclick="switchTab('home')"><div class="tab-ic">🏠</div><div class="tab-lb">Главная</div></div>
-    <div class="tab" id="tab-journal" onclick="switchTab('journal')"><div class="tab-ic">📒</div><div class="tab-lb">Журнал</div></div>
-    <div class="tab" id="tab-analytics" onclick="switchTab('analytics')"><div class="tab-ic">📊</div><div class="tab-lb">Аналитика</div></div>
-    <div class="tab" id="tab-profile" onclick="switchTab('profile')"><div class="tab-ic">👤</div><div class="tab-lb">Профиль</div></div>
+    <div class="tab on" id="tab-home" onclick="switchTab('home')" data-tip="Обзор портфеля и AI-советы"><div class="tab-ic">🏠</div><div class="tab-lb">Главная</div></div>
+    <div class="tab" id="tab-journal" onclick="switchTab('journal')" data-tip="Добавляй активы — ОФЗ, акции, фонды"><div class="tab-ic">📒</div><div class="tab-lb">Журнал</div></div>
+    <div class="tab" id="tab-analytics" onclick="switchTab('analytics')" data-tip="Следи за доходностью и прогнозами"><div class="tab-ic">📊</div><div class="tab-lb">Аналитика</div></div>
+    <div class="tab" id="tab-profile" onclick="switchTab('profile')" data-tip="Настройки, тариф, уведомления"><div class="tab-ic">👤</div><div class="tab-lb">Профиль</div></div>
   </div>
 </div>
 
@@ -1377,7 +1464,20 @@ function toggleCb(n){
 function doConsent(){
   if(!cbState[1]||!cbState[2]||!cbState[3]||!cbState[4]||!cbState[5]){toast('Необходимо подтвердить все 5 пунктов');return}
   U().consented=true;U().consentDate=new Date().toISOString();
-  sv('ig_users',users);R('scr-consent').classList.remove('on');startApp();
+  sv('ig_users',users);
+  if(typeof fbSaveUser==='function')fbSaveUser(curUser,U());
+  R('scr-consent').classList.remove('on');
+  // Показываем онбординг только при первой регистрации
+  if(!U().onboardDone){
+    R('scr-onboard').classList.add('on');
+  } else {
+    startApp();
+  }
+}
+function closeOnboard(){
+  U().onboardDone=true;sU();
+  var ob=R('scr-onboard');if(ob)ob.classList.remove('on');
+  startApp();
 }
 
 /* ════ APP START ════ */
@@ -2325,9 +2425,53 @@ function doLogout(){
 }
 
 function deleteAccount(){
-  showConfirm('Удалить аккаунт?','Все данные будут удалены безвозвратно.','Удалить',function(){
-    var users=lv('ig_users',{});delete users[curUser];sv('ig_users',users);sv('ig_session',null);location.reload();
-  });
+  showConfirm(
+    'Удалить аккаунт?',
+    'Все данные портфеля, настройки и история будут удалены безвозвратно. Восстановление невозможно.',
+    'Удалить',
+    async function(){
+      try{
+        // 1. Удаляем данные из Firestore
+        if(fbDb&&curUser){
+          await fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete()
+            .catch(function(e){console.warn('[Delete] Firestore error:',e);});
+        }
+        // 2. Удаляем аккаунт из Firebase Auth
+        if(fbAuth&&fbAuth.currentUser){
+          await fbAuth.currentUser.delete()
+            .catch(function(e){
+              console.warn('[Delete] Auth error:',e);
+              // Если ошибка requires-recent-login — просим переавторизоваться
+              if(e.code==='auth/requires-recent-login'){
+                toast('Для удаления войдите заново и повторите');
+                fbLogout();
+                sv('ig_session',null);
+                location.reload();
+                return;
+              }
+            });
+        }
+        // 3. Очищаем localStorage
+        var users=lv('ig_users',{});
+        delete users[curUser];
+        sv('ig_users',users);
+        sv('ig_session',null);
+        // 4. Выходим из Firebase
+        fbLogout();
+        // 5. Перезагружаем
+        location.reload();
+      }catch(e){
+        console.error('[Delete] error:',e);
+        // Даже при ошибке — очищаем локально и перезагружаем
+        var users=lv('ig_users',{});
+        delete users[curUser];
+        sv('ig_users',users);
+        sv('ig_session',null);
+        fbLogout();
+        location.reload();
+      }
+    }
+  );
 }
 
 var _confirmCb=null;
@@ -3027,7 +3171,58 @@ function checkGoalAchieved() {
   }
 }
 
-/* ── iOS определение ── */
+/* ═══ TOOLTIP SYSTEM ═══ */
+var _ttTimer=null;
+var _ttEl=null;
+var _isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+function initTooltips(){
+  // Находим все элементы с data-tip атрибутом
+  document.querySelectorAll('[data-tip]').forEach(function(el){
+    el.classList.add('tt');
+    // Создаём box
+    var box=document.createElement('div');
+    box.className='tt-box';
+    box.textContent=el.dataset.tip;
+    el.appendChild(box);
+
+    if(_isMobile){
+      // Телефон: долгое нажатие 1.5 сек
+      el.addEventListener('touchstart',function(e){
+        _ttTimer=setTimeout(function(){
+          box.classList.add('show');
+          _ttEl=box;
+        },1500);
+      },{passive:true});
+      el.addEventListener('touchend',function(){
+        clearTimeout(_ttTimer);
+        box.classList.remove('show');
+      });
+      el.addEventListener('touchmove',function(){
+        clearTimeout(_ttTimer);
+        box.classList.remove('show');
+      },{passive:true});
+    } else {
+      // Компьютер: наведение 3 сек
+      el.addEventListener('mouseenter',function(){
+        _ttTimer=setTimeout(function(){
+          box.classList.add('show');
+          _ttEl=box;
+        },3000);
+      });
+      el.addEventListener('mouseleave',function(){
+        clearTimeout(_ttTimer);
+        box.classList.remove('show');
+        _ttEl=null;
+      });
+    }
+  });
+}
+
+// Запускаем после старта приложения
+document.addEventListener('DOMContentLoaded',function(){
+  setTimeout(initTooltips,2000);
+});
 var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 var isInStandaloneMode=window.navigator.standalone===true;
 // Показываем подсказку для iOS
