@@ -693,7 +693,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
         </div>
       </div>
       <div class="hdr-right">
-        <div class="ai-badge" id="ai-badge" onclick="switchTab('profile')" data-tip="Осталось AI-запросов в этом месяце">
+        <div class="ai-badge" id="ai-badge" onclick="switchTab('profile')" data-tip="⚡ Осталось AI-запросов. Каждый запрос — актуальные данные от нейросети">
           <div class="ai-dot"></div>
           <span class="ai-cnt" id="ai-cnt">—</span>
           <span style="color:var(--hi);font-size:10px">зап.</span>
@@ -702,9 +702,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       </div>
     </div>
     <div class="sbar" id="sbar">
-      <div class="chip on" data-s="cons" onclick="setStrat('cons')"><div class="dot" style="background:var(--green)"></div>Консерватор</div>
-      <div class="chip" data-s="mod" onclick="setStrat('mod')"><div class="dot" style="background:var(--blue)"></div>Умеренный</div>
-      <div class="chip" data-s="agg" onclick="setStrat('agg')"><div class="dot" style="background:var(--red)"></div>Агрессивный</div>
+      <div class="chip on" data-s="cons" onclick="setStrat('cons')" data-tip="🛡️ ОФЗ + дивиденды. Стабильный доход ~11%/год — идеально для начала инвестиций"><div class="dot" style="background:var(--green)"></div>Консерватор</div>
+      <div class="chip" data-s="mod" onclick="setStrat('mod')" data-tip="⚖️ Облигации + акции + фонды. Баланс риска и дохода ~14%/год — популярный выбор"><div class="dot" style="background:var(--blue)"></div>Умеренный</div>
+      <div class="chip" data-s="agg" onclick="setStrat('agg')" data-tip="🚀 Акции роста и высокодоходные бумаги ~18%/год. Доступно на тарифе Премиум"><div class="dot" style="background:var(--red)"></div>Агрессивный</div>
     </div>
   </div>
 
@@ -727,10 +727,10 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <!-- Live AI -->
       <div class="stit"><span>⚡ Актуальные данные</span></div>
       <div class="live-row">
-        <div class="live-chip" onclick="askAI('q1')"><div class="live-chip-ic">📅</div><div class="live-chip-t">Что купить в <span id="lb-mon">мае</span></div><div class="live-dot"></div></div>
-        <div class="live-chip" onclick="askAI('q2')"><div class="live-chip-ic">📋</div><div class="live-chip-t">Доходность ОФЗ</div><div class="live-dot"></div></div>
-        <div class="live-chip" onclick="askAI('q3')"><div class="live-chip-ic">💹</div><div class="live-chip-t">Дивиденды</div><div class="live-dot"></div></div>
-        <div class="live-chip" onclick="askAI('q4')"><div class="live-chip-ic">🏦</div><div class="live-chip-t">Ставка ЦБ</div><div class="live-dot"></div></div>
+        <div class="live-chip" onclick="askAI('q1')" data-tip="🤖 Новейший AI подберёт что купить именно под твою стратегию и бюджет прямо сейчас"><div class="live-chip-ic">📅</div><div class="live-chip-t">Что купить в <span id="lb-mon">мае</span></div><div class="live-dot"></div></div>
+        <div class="live-chip" onclick="askAI('q2')" data-tip="📈 AI покажет актуальную доходность ОФЗ — узнай где сейчас выгоднее всего"><div class="live-chip-ic">📋</div><div class="live-chip-t">Доходность ОФЗ</div><div class="live-dot"></div></div>
+        <div class="live-chip" onclick="askAI('q3')" data-tip="💰 Узнай какие компании платят дивиденды прямо сейчас и сколько можно заработать"><div class="live-chip-ic">💹</div><div class="live-chip-t">Дивиденды</div><div class="live-dot"></div></div>
+        <div class="live-chip" onclick="askAI('q4')" data-tip="🏦 Текущая ставка ЦБ напрямую влияет на доходность твоего портфеля — узнай прогноз"><div class="live-chip-ic">🏦</div><div class="live-chip-t">Ставка ЦБ</div><div class="live-dot"></div></div>
       </div>
       <div class="ai-res" id="ai-res"></div>
 
@@ -791,7 +791,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div class="proj" id="proj"></div>
 
       <!-- Goal -->
-      <div class="card">
+      <div class="card" data-tip="🎯 Шкала показывает как далеко ты от цели пассивного дохода. Настрой цель в Профиле!">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div class="card-lbl" style="margin-bottom:0">📈 До цели <span id="goal-disp" style="color:var(--sc)">—</span></div>
           <div style="font-size:12px;font-family:var(--mono);font-weight:600;color:var(--sc)" id="goal-pct">0%</div>
@@ -858,7 +858,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       </div>
     </div>
     <div class="scroll" style="padding-top:12px">
-      <div class="add-btn" onclick="openAdd()"><span style="font-size:20px">＋</span><span>Добавить покупку</span></div>
+      <div class="add-btn" onclick="openAdd()" data-tip="➕ Добавь актив — AI автоматически найдёт доходность и заполнит данные"><span style="font-size:20px">＋</span><span>Добавить покупку</span></div>
       <div id="jlist"><div style="text-align:center;padding:36px 0;color:var(--hi);font-size:12px">Записей пока нет</div></div>
       <div class="discl" style="margin-top:8px">Доход рассчитывается по доходности каждого актива отдельно</div>
     </div>
@@ -1074,10 +1074,10 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 
   <!-- TABS -->
   <div class="tabs">
-    <div class="tab on" id="tab-home" onclick="switchTab('home')" data-tip="Обзор портфеля и AI-советы"><div class="tab-ic">🏠</div><div class="tab-lb">Главная</div></div>
-    <div class="tab" id="tab-journal" onclick="switchTab('journal')" data-tip="Добавляй активы — ОФЗ, акции, фонды"><div class="tab-ic">📒</div><div class="tab-lb">Журнал</div></div>
-    <div class="tab" id="tab-analytics" onclick="switchTab('analytics')" data-tip="Следи за доходностью и прогнозами"><div class="tab-ic">📊</div><div class="tab-lb">Аналитика</div></div>
-    <div class="tab" id="tab-profile" onclick="switchTab('profile')" data-tip="Настройки, тариф, уведомления"><div class="tab-ic">👤</div><div class="tab-lb">Профиль</div></div>
+    <div class="tab on" id="tab-home" onclick="switchTab('home')" data-tip="🏠 Обзор портфеля, AI-советы и твой путь к финансовой цели"><div class="tab-ic">🏠</div><div class="tab-lb">Главная</div></div>
+    <div class="tab" id="tab-journal" onclick="switchTab('journal')" data-tip="📒 Добавляй активы — ОФЗ, акции, фонды. AI сам найдёт доходность!"><div class="tab-ic">📒</div><div class="tab-lb">Журнал</div></div>
+    <div class="tab" id="tab-analytics" onclick="switchTab('analytics')" data-tip="📊 Следи за ростом портфеля, сравнивай с рынком и строй прогнозы на 5 лет"><div class="tab-ic">📊</div><div class="tab-lb">Аналитика</div></div>
+    <div class="tab" id="tab-profile" onclick="switchTab('profile')" data-tip="👤 Настрой цель, бюджет, уведомления и выбери подходящий тариф"><div class="tab-ic">👤</div><div class="tab-lb">Профиль</div></div>
   </div>
 </div>
 
