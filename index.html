@@ -541,7 +541,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   <div class="cblk">
     <div class="cblk-t">🔒 Персональные данные (ФЗ №152-ФЗ)</div>
     <div class="cblk-b">
-      Данные (email, имя, история покупок) хранятся на защищённых облачных серверах (Google Cloud) с шифрованием. Передача данных происходит по зашифрованному соединению HTTPS. Данные доступны только вам и администрации сервиса в целях технической поддержки. Не передаются рекламным сетям или иным третьим лицам. Вы можете удалить аккаунт и все данные в Профиле в любой момент. Соответствует требованиям ФЗ №152-ФЗ.
+      Данные хранятся на защищённых облачных серверах (Google Cloud) с шифрованием. Соответствует требованиям ФЗ №152-ФЗ в части защиты данных.
     </div>
   </div>
 
@@ -592,8 +592,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 </div>
 
 <!-- ONBOARDING SCREEN -->
-<div class="screen" id="scr-onboard" style="overflow:hidden">
-  <div style="height:100%;display:flex;flex-direction:column">
+<div class="screen" id="scr-onboard" style="overflow:hidden;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(160deg,#0d2e1a,#0d1117);border:1px solid rgba(0,212,100,0.2);border-radius:24px;width:90%;max-width:400px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
 
     <!-- Slides -->
     <div id="ob-slides" style="flex:1;display:flex;overflow:hidden;position:relative">
@@ -2461,45 +2461,54 @@ function deleteAccount(){
     'Все данные портфеля, настройки и история будут удалены безвозвратно. Восстановление невозможно.',
     'Удалить',
     async function(){
+      // Показываем прогресс
+      toast('⏳ Удаляем аккаунт...');
+
       try{
         // 1. Удаляем данные из Firestore
         if(fbDb&&curUser){
-          await fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete()
-            .catch(function(e){console.warn('[Delete] Firestore error:',e);});
+          try{
+            await fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete();
+            console.log('[Delete] Firestore OK');
+          }catch(e){console.warn('[Delete] Firestore:',e.message);}
         }
-        // 2. Удаляем аккаунт из Firebase Auth
+
+        // 2. Удаляем из Firebase Auth
         if(fbAuth&&fbAuth.currentUser){
-          await fbAuth.currentUser.delete()
-            .catch(function(e){
-              console.warn('[Delete] Auth error:',e);
-              // Если ошибка requires-recent-login — просим переавторизоваться
-              if(e.code==='auth/requires-recent-login'){
-                toast('Для удаления войдите заново и повторите');
-                fbLogout();
-                sv('ig_session',null);
-                location.reload();
-                return;
-              }
-            });
+          try{
+            await fbAuth.currentUser.delete();
+            console.log('[Delete] Auth OK');
+          }catch(e){
+            if(e.code==='auth/requires-recent-login'){
+              // Нужен повторный вход — сначала всё равно чистим локально
+              console.warn('[Delete] requires-recent-login — чистим локально');
+            }else{
+              console.warn('[Delete] Auth error:',e.message);
+            }
+          }
         }
-        // 3. Очищаем localStorage
-        var users=lv('ig_users',{});
-        delete users[curUser];
-        sv('ig_users',users);
-        sv('ig_session',null);
-        // 4. Выходим из Firebase
-        fbLogout();
+
+        // 3. Полностью очищаем ВСЕ данные localStorage
+        localStorage.removeItem('ig_users');
+        localStorage.removeItem('ig_session');
+        localStorage.removeItem('ig_notif');
+        localStorage.removeItem('ig_admin');
+        localStorage.removeItem('ig_api_log');
+        localStorage.removeItem('ig_goal_notified');
+        localStorage.removeItem('ig_email_sent');
+
+        // 4. Выходим из Firebase Auth
+        if(fbAuth) await fbAuth.signOut().catch(function(){});
+
         // 5. Перезагружаем
-        location.reload();
+        setTimeout(function(){location.reload();},500);
+
       }catch(e){
-        console.error('[Delete] error:',e);
-        // Даже при ошибке — очищаем локально и перезагружаем
-        var users=lv('ig_users',{});
-        delete users[curUser];
-        sv('ig_users',users);
-        sv('ig_session',null);
-        fbLogout();
-        location.reload();
+        console.error('[Delete] critical error:',e);
+        // Даже при ошибке — чистим всё и перезагружаем
+        localStorage.clear();
+        if(fbAuth) fbAuth.signOut().catch(function(){});
+        setTimeout(function(){location.reload();},500);
       }
     }
   );
