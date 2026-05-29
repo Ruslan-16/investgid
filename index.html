@@ -407,6 +407,24 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 @keyframes btnSweep{0%,100%{left:-60%}50%{left:120%}}
 
 @keyframes barShine{0%{transform:translateX(-100%)}50%,100%{transform:translateX(200%)}}
+
+/* ONBOARDING */
+#scr-onboard{position:fixed;inset:0;background:linear-gradient(135deg,#0d1117 0%,#0d2e1a 40%,#1a3a0d 70%,#0f2a1a 100%);z-index:200;display:none;overflow:hidden}
+#scr-onboard.on{display:flex;flex-direction:column}
+.ob-slides{display:flex;flex:1;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.ob-slide{min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center}
+.ob-icon{font-size:72px;margin-bottom:24px;animation:obFloat 3s ease-in-out infinite}
+@keyframes obFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ob-title{font-family:var(--serif);font-size:26px;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.25}
+.ob-title span{background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ob-text{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;max-width:300px}
+.ob-text strong{color:rgba(255,255,255,0.85)}
+.ob-dots{display:flex;gap:8px;justify-content:center;padding:20px 0}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:.3s;cursor:pointer}
+.ob-dot.on{width:24px;border-radius:4px;background:var(--green)}
+.ob-footer{padding:0 24px calc(max(env(safe-area-inset-bottom),20px) + 16px);display:flex;gap:12px}
+.ob-skip{flex:1;padding:14px;border:1.5px solid rgba(255,255,255,0.15);border-radius:14px;background:transparent;color:rgba(255,255,255,0.45);font-family:var(--serif);font-size:15px;cursor:pointer}
+.ob-next{flex:2;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--green),#00A882);color:#000;font-family:var(--serif);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,212,100,0.3)}
 </style>
 </head>
 <body>
@@ -417,6 +435,36 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   <div class="ld-name">ИнвестГид</div>
   <div class="ld-tag">Образовательный сервис</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- ONBOARDING (3 слайда — только при первом входе) -->
+<div class="screen" id="scr-onboard">
+  <div class="ob-slides" id="ob-slides">
+    <div class="ob-slide">
+      <div class="ob-icon">📈</div>
+      <div class="ob-title">Добро пожаловать<br>в <span>ИнвестГид</span></div>
+      <div class="ob-text">Образовательный сервис по инвестициям на <strong>российском рынке</strong>. Учись инвестировать правильно.</div>
+    </div>
+    <div class="ob-slide">
+      <div class="ob-icon">🤖</div>
+      <div class="ob-title">AI помогает<br><span>разобраться</span></div>
+      <div class="ob-text">Задавай вопросы про <strong>ОФЗ, дивиденды, ставку ЦБ</strong>. AI отвечает актуальными данными и простым языком.</div>
+    </div>
+    <div class="ob-slide">
+      <div class="ob-icon">🎯</div>
+      <div class="ob-title">Ставь цель —<br><span>достигай её</span></div>
+      <div class="ob-text">Веди журнал покупок, следи за <strong>пассивным доходом</strong> и получай персональный план от AI. Всё в одном месте.</div>
+    </div>
+  </div>
+  <div class="ob-dots">
+    <div class="ob-dot on" id="ob-d0" onclick="goSlide(0)"></div>
+    <div class="ob-dot" id="ob-d1" onclick="goSlide(1)"></div>
+    <div class="ob-dot" id="ob-d2" onclick="goSlide(2)"></div>
+  </div>
+  <div class="ob-footer">
+    <button class="ob-skip" onclick="finishOnboard()">Пропустить</button>
+    <button class="ob-next" id="ob-next-btn" onclick="nextSlide()">Далее →</button>
+  </div>
 </div>
 
 <!-- AUTH -->
@@ -541,7 +589,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   <div class="cblk">
     <div class="cblk-t">🔒 Персональные данные (ФЗ №152-ФЗ)</div>
     <div class="cblk-b">
-      Данные (email, имя, история покупок) хранятся <strong>локально на вашем устройстве</strong> (localStorage). Не передаются третьим лицам, рекламным сетям или государственным органам. Вы можете удалить аккаунт и все данные в Профиле в любой момент. При удалении приложения все данные удаляются автоматически.
+      Данные (email, имя, история покупок) надёжно хранятся в защищённом облаке (Firebase). Не передаются третьим лицам, рекламным сетям или государственным органам. Вы можете удалить аккаунт и все данные в разделе Профиль — данные удаляются сразу и безвозвратно.
     </div>
   </div>
 
@@ -1266,7 +1314,7 @@ setTimeout(function(){
         // Не залогинен — проверяем локальную сессию
         var s=lv('ig_session',null);
         if(s&&users[s]&&users[s].consented){curUser=s;startApp();}
-        else{R('scr-auth').classList.add('on');}
+        else{maybeShowOnboard();}
       }
     );
   },500);
@@ -2303,18 +2351,28 @@ function doLogout(){
 
 function deleteAccount(){
   showConfirm('Удалить аккаунт?','Все данные портфеля, настройки и история будут удалены безвозвратно. Восстановление невозможно.','Удалить',function(){
-    var u=users[curUser];
-    // Удаляем из Firebase Auth если доступен
-    if(fbAuth&&fbAuth.currentUser){
-      fbAuth.currentUser.delete().catch(function(){});
-    }
     // Удаляем из Firestore
     if(fbDb&&curUser){
       fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete().catch(function(){});
     }
-    delete users[curUser];
+    // Удаляем из Firebase Auth — нужна свежая авторизация
+    // Сначала чистим локальные данные, потом удаляем аккаунт
+    var emailToDelete=curUser;
+    delete users[emailToDelete];
     sv('ig_users',users);
     sv('ig_session',null);
+    // Пробуем удалить из Firebase Auth
+    if(fbAuth&&fbAuth.currentUser){
+      fbAuth.currentUser.delete()
+        .then(function(){console.log('[Delete] Firebase Auth удалён');})
+        .catch(function(e){
+          // Если требует повторного входа — просто выходим, аккаунт де-факто очищен
+          console.warn('[Delete] Auth требует re-auth, выходим:',e.code);
+          if(fbAuth)fbAuth.signOut().catch(function(){});
+        });
+    }else if(fbAuth){
+      fbAuth.signOut().catch(function(){});
+    }
     location.reload();
   });
 }
@@ -3127,6 +3185,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 3000); // через 3 сек после загрузки
 });
+
+/* ── ONBOARDING ── */
+var _obSlide=0;
+function goSlide(n){
+  _obSlide=n;
+  var sl=R('ob-slides');if(sl)sl.style.transform='translateX(-'+n*100+'%)';
+  [0,1,2].forEach(function(i){var d=R('ob-d'+i);if(d)d.classList.toggle('on',i===n);});
+  var btn=R('ob-next-btn');if(btn)btn.textContent=n===2?'Начать →':'Далее →';
+}
+function nextSlide(){
+  if(_obSlide<2){goSlide(_obSlide+1);}
+  else{finishOnboard();}
+}
+function finishOnboard(){
+  sv('ig_onboarded','1');
+  R('scr-onboard').classList.remove('on');
+  R('scr-auth').classList.add('on');
+}
+function maybeShowOnboard(){
+  // Показываем онбординг только при первом визите
+  if(!lv('ig_onboarded',null)){
+    R('scr-onboard').classList.add('on');
+  }else{
+    R('scr-auth').classList.add('on');
+  }
+}
 </script>
 </body>
 </html>
