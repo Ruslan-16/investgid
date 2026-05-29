@@ -592,7 +592,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 </div>
 
 <!-- ONBOARDING SCREEN -->
-<div class="screen" id="scr-onboard" style="overflow:hidden;display:none">
+<div class="screen" id="scr-onboard" style="overflow:hidden">
   <div style="height:100%;display:flex;flex-direction:column">
 
     <!-- Slides -->
@@ -3149,11 +3149,13 @@ function showLocalNotif(title, body, icon, url) {
 /* ─── Умный планировщик с учётом настроек ─── */
 function scheduleReminderCustom() {
   var cfg = lv('ig_notif', {pushOn:false, day:1, hour:10, emailOn:false, email:''});
-  if (!cfg.pushOn || Notification.permission !== 'granted') return;
+  if (!cfg.pushOn) return;
+  if (Notification.permission !== 'granted') return;
   var now = new Date();
   var next = new Date(now.getFullYear(), now.getMonth(), cfg.day, cfg.hour, 0, 0);
   if (next <= now) next = new Date(now.getFullYear(), now.getMonth()+1, cfg.day, cfg.hour, 0, 0);
   var msUntil = next - now;
+  // Не создаём новый таймер если уже есть
   if (window._reminderTimer) clearTimeout(window._reminderTimer);
   window._reminderTimer = setTimeout(function() {
     var u = typeof U === 'function' ? U() : {};
@@ -3162,9 +3164,11 @@ function scheduleReminderCustom() {
     showLocalNotif('📅 Время пополнить портфель!', 'Взнос: '+budget+'/мес · '+strat, null, '/');
     var c2 = lv('ig_notif', {});
     if (c2.emailOn && c2.email) sendReminderEmail(c2.email, budget, strat);
+    // Планируем следующее через месяц
+    window._reminderTimer = null;
     setTimeout(scheduleReminderCustom, 5000);
   }, msUntil);
-  console.log('[App] Напоминание:', next.toLocaleString('ru-RU'));
+  console.log('[App] Напоминание запланировано:', next.toLocaleString('ru-RU'), 'через', Math.round(msUntil/1000/60), 'мин');
 }
 function scheduleMonthlyReminder() { scheduleReminderCustom(); }
 
@@ -3191,6 +3195,12 @@ function sendEmail(toEmail,subject,message,onSuccess,onError){
     .catch(function(e){if(onError)onError(e.text||e.message||'Ошибка');});
 }
 function sendReminderEmail(email,budget,strat){
+  // Защита от спама — отправляем не чаще 1 раза в день
+  var today=new Date().toLocaleDateString('ru-RU');
+  var lastSent=localStorage.getItem('ig_email_sent');
+  if(lastSent===today){console.log('[Email] уже отправлено сегодня');return;}
+  localStorage.setItem('ig_email_sent',today);
+
   var MO=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   var now=new Date();
   sendEmail(email,'📅 Время пополнить портфель — ИнвестГид',
