@@ -600,7 +600,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div id="ob-slides" style="height:420px;overflow:hidden;position:relative">
 
       <!-- Страница 1 — Журнал и главная -->
-      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1)">
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1)">
         <div style="text-align:center;margin-bottom:18px">
           <div style="font-size:48px;margin-bottom:8px">📱</div>
           <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">Твой помощник<br>по инвестициям</div>
@@ -627,7 +627,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       </div>
 
       <!-- Страница 2 — AI кнопки -->
-      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(100%)">
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(100%)">
         <div style="text-align:center;margin-bottom:18px">
           <div style="font-size:48px;margin-bottom:8px">🤖</div>
           <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">AI-советы<br>в один клик</div>
@@ -658,7 +658,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       </div>
 
       <!-- Страница 3 — Аналитика и стратегии -->
-      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(200%)">
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(200%)">
         <div style="text-align:center;margin-bottom:18px">
           <div style="font-size:48px;margin-bottom:8px">📊</div>
           <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">Аналитика<br>и стратегии</div>
@@ -2467,58 +2467,74 @@ function deleteAccount(){
     'Удалить аккаунт?',
     'Все данные портфеля, настройки и история будут удалены безвозвратно. Восстановление невозможно.',
     'Удалить',
-    async function(){
-      // Показываем прогресс
-      toast('⏳ Удаляем аккаунт...');
-
-      try{
-        // 1. Удаляем данные из Firestore
-        if(fbDb&&curUser){
-          try{
-            await fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete();
-            console.log('[Delete] Firestore OK');
-          }catch(e){console.warn('[Delete] Firestore:',e.message);}
-        }
-
-        // 2. Удаляем из Firebase Auth
-        if(fbAuth&&fbAuth.currentUser){
-          try{
-            await fbAuth.currentUser.delete();
-            console.log('[Delete] Auth OK');
-          }catch(e){
-            if(e.code==='auth/requires-recent-login'){
-              // Нужен повторный вход — сначала всё равно чистим локально
-              console.warn('[Delete] requires-recent-login — чистим локально');
-            }else{
-              console.warn('[Delete] Auth error:',e.message);
-            }
-          }
-        }
-
-        // 3. Полностью очищаем ВСЕ данные localStorage
-        localStorage.removeItem('ig_users');
-        localStorage.removeItem('ig_session');
-        localStorage.removeItem('ig_notif');
-        localStorage.removeItem('ig_admin');
-        localStorage.removeItem('ig_api_log');
-        localStorage.removeItem('ig_goal_notified');
-        localStorage.removeItem('ig_email_sent');
-
-        // 4. Выходим из Firebase Auth
-        if(fbAuth) await fbAuth.signOut().catch(function(){});
-
-        // 5. Перезагружаем
-        setTimeout(function(){location.reload();},500);
-
-      }catch(e){
-        console.error('[Delete] critical error:',e);
-        // Даже при ошибке — чистим всё и перезагружаем
-        localStorage.clear();
-        if(fbAuth) fbAuth.signOut().catch(function(){});
-        setTimeout(function(){location.reload();},500);
-      }
+    function(){
+      // Запрашиваем пароль для подтверждения (нужен Firebase для реаутентификации)
+      var pass=prompt('Введите пароль для подтверждения удаления:');
+      if(!pass){toast('Удаление отменено');return;}
+      _doDeleteAccount(pass);
     }
   );
+}
+
+async function _doDeleteAccount(pass){
+  toast('⏳ Удаляем аккаунт...');
+  try{
+    // 1. Реаутентификация — обязательно для Firebase
+    if(fbAuth&&fbAuth.currentUser&&curUser){
+      try{
+        var cred=firebase.auth.EmailAuthProvider.credential(curUser,pass);
+        await fbAuth.currentUser.reauthenticateWithCredential(cred);
+        console.log('[Delete] реаутентификация OK');
+      }catch(e){
+        console.warn('[Delete] реаутентификация failed:',e.code);
+        if(e.code==='auth/wrong-password'){
+          toast('❌ Неверный пароль');return;
+        }
+        if(e.code==='auth/too-many-requests'){
+          toast('⏳ Слишком много попыток. Подождите.');return;
+        }
+      }
+    }
+
+    // 2. Удаляем данные из Firestore
+    if(fbDb&&curUser){
+      try{
+        await fbDb.collection('users').doc(curUser.replace(/\./g,'_')).delete();
+        console.log('[Delete] Firestore OK');
+      }catch(e){console.warn('[Delete] Firestore:',e.message);}
+    }
+
+    // 3. Удаляем аккаунт из Firebase Auth
+    if(fbAuth&&fbAuth.currentUser){
+      try{
+        await fbAuth.currentUser.delete();
+        console.log('[Delete] Firebase Auth OK');
+      }catch(e){
+        console.warn('[Delete] Auth:',e.message);
+      }
+    }
+
+    // 4. Очищаем ВСЕ данные localStorage
+    localStorage.removeItem('ig_users');
+    localStorage.removeItem('ig_session');
+    localStorage.removeItem('ig_notif');
+    localStorage.removeItem('ig_admin');
+    localStorage.removeItem('ig_api_log');
+    localStorage.removeItem('ig_goal_notified');
+    localStorage.removeItem('ig_email_sent');
+
+    // 5. Выходим из Firebase
+    if(fbAuth) await fbAuth.signOut().catch(function(){});
+
+    toast('✅ Аккаунт удалён');
+    setTimeout(function(){location.reload();},1000);
+
+  }catch(e){
+    console.error('[Delete] критическая ошибка:',e);
+    localStorage.clear();
+    if(fbAuth) fbAuth.signOut().catch(function(){});
+    setTimeout(function(){location.reload();},1000);
+  }
 }
 
 var _confirmCb=null;
