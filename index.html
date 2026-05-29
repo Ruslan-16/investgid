@@ -592,114 +592,120 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 </div>
 
 <!-- ONBOARDING SCREEN -->
-<div class="screen" id="scr-onboard" style="overflow:hidden;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center">
-  <div style="background:linear-gradient(160deg,#0d2e1a,#0d1117);border:1px solid rgba(0,212,100,0.2);border-radius:24px;width:90%;max-width:400px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+<div class="screen" id="scr-onboard" style="background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(160deg,#0d2e1a,#0d1117);border:1px solid rgba(0,212,100,0.2);border-radius:24px;width:92%;max-width:400px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
 
-    <!-- Slides -->
-    <div id="ob-slides" style="flex:1;display:flex;overflow:hidden;position:relative">
+    <!-- Slides wrapper -->
+    <div id="ob-slides" style="flex:1;overflow:hidden;position:relative;min-height:0">
 
-      <!-- Страница 1 — Главная и журнал -->
-      <div class="ob-slide" style="min-width:100%;padding:36px 24px 16px;display:flex;flex-direction:column;overflow-y:auto">
-        <div style="text-align:center;margin-bottom:20px">
-          <div style="font-size:52px;margin-bottom:10px">📱</div>
-          <div style="font-family:var(--serif);font-size:22px;font-weight:800;margin-bottom:6px">Твой инвестиционный<br>помощник</div>
-          <div style="color:var(--mu);font-size:13px">Что умеет ИнвестГид</div>
+      <!-- Страница 1 — Журнал и главная -->
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1)">
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:48px;margin-bottom:8px">📱</div>
+          <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">Твой помощник<br>по инвестициям</div>
+          <div style="color:var(--mu);font-size:12px">Что умеет ИнвестГид</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🏠</div>
-            <div><div style="font-size:13px;font-weight:600">Главная</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Обзор портфеля, AI-советы и путь к цели</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🏠</div>
+            <div><div style="font-size:13px;font-weight:600">Главная</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Обзор портфеля, AI-советы и путь к цели</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">📒</div>
-            <div><div style="font-size:13px;font-weight:600">Журнал покупок</div><div style="font-size:11px;color:var(--mu);margin-top:2px">AI сам найдёт доходность активов автоматически</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">📒</div>
+            <div><div style="font-size:13px;font-weight:600">Журнал покупок</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Записывай активы — ОФЗ, акции, фонды</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">➕</div>
-            <div><div style="font-size:13px;font-weight:600">Добавить актив</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Введи название — AI автоматически найдёт доходность</div></div>
+          <div style="background:rgba(0,212,100,.08);border:1px solid rgba(0,212,100,.2);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">➕</div>
+            <div><div style="font-size:13px;font-weight:600">Добавить актив</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Введи название и кол-во — AI сам найдёт текущую доходность из открытых источников</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🎯</div>
-            <div><div style="font-size:13px;font-weight:600">Шкала цели</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Показывает как далеко ты от цели пассивного дохода</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🎯</div>
+            <div><div style="font-size:13px;font-weight:600">Шкала цели</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Показывает путь к цели пассивного дохода</div></div>
           </div>
         </div>
       </div>
 
-      <!-- Страница 2 — AI кнопки и стратегии -->
-      <div class="ob-slide" style="min-width:100%;padding:36px 24px 16px;display:flex;flex-direction:column;overflow-y:auto">
-        <div style="text-align:center;margin-bottom:20px">
-          <div style="font-size:52px;margin-bottom:10px">🤖</div>
-          <div style="font-family:var(--serif);font-size:22px;font-weight:800;margin-bottom:6px">AI-советы<br>и стратегии</div>
-          <div style="color:var(--mu);font-size:13px">Актуальные данные от нейросети</div>
+      <!-- Страница 2 — AI кнопки -->
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(100%)">
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:48px;margin-bottom:8px">🤖</div>
+          <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">AI-советы<br>в один клик</div>
+          <div style="color:var(--mu);font-size:12px">Актуальные данные от нейросети Claude</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="background:rgba(0,212,100,.08);border:1px solid rgba(0,212,100,.15);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">⚡</div>
-            <div><div style="font-size:13px;font-weight:600">Счётчик AI-запросов</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Каждый запрос — актуальные данные от нейросети</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:rgba(0,212,100,.08);border:1px solid rgba(0,212,100,.2);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">⚡</div>
+            <div><div style="font-size:13px;font-weight:600">Счётчик AI-запросов</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Показывает сколько запросов осталось в этом месяце</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🤖</div>
-            <div><div style="font-size:13px;font-weight:600">Что купить</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Новейший AI подберёт что купить под твою стратегию</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🛒</div>
+            <div><div style="font-size:13px;font-weight:600">Что купить</div><div style="font-size:11px;color:var(--mu);margin-top:1px">AI подберёт что купить под твою стратегию и бюджет</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">📈</div>
-            <div><div style="font-size:13px;font-weight:600">Доходность ОФЗ</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Узнай где сейчас выгоднее всего вложить</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">📈</div>
+            <div><div style="font-size:13px;font-weight:600">Доходность ОФЗ</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Актуальные ставки — узнай где выгоднее вложить</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">💰</div>
-            <div><div style="font-size:13px;font-weight:600">Дивиденды</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Сколько можно заработать прямо сейчас</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">💰</div>
+            <div><div style="font-size:13px;font-weight:600">Дивиденды</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Какие компании платят дивиденды прямо сейчас</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🏦</div>
-            <div><div style="font-size:13px;font-weight:600">Ставка ЦБ</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Напрямую влияет на доходность твоего портфеля</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🏦</div>
+            <div><div style="font-size:13px;font-weight:600">Ставка ЦБ</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Влияет на доходность портфеля — следи за изменениями</div></div>
           </div>
         </div>
       </div>
 
-      <!-- Страница 3 — Аналитика, профиль, стратегии -->
-      <div class="ob-slide" style="min-width:100%;padding:36px 24px 16px;display:flex;flex-direction:column;overflow-y:auto">
-        <div style="text-align:center;margin-bottom:20px">
-          <div style="font-size:52px;margin-bottom:10px">📊</div>
-          <div style="font-family:var(--serif);font-size:22px;font-weight:800;margin-bottom:6px">Аналитика<br>и настройки</div>
-          <div style="color:var(--mu);font-size:13px">Следи за ростом и ставь цели</div>
+      <!-- Страница 3 — Аналитика и стратегии -->
+      <div class="ob-slide" style="position:absolute;inset:0;overflow-y:auto;padding:28px 20px 12px;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateX(200%)">
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:48px;margin-bottom:8px">📊</div>
+          <div style="font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:4px">Аналитика<br>и стратегии</div>
+          <div style="color:var(--mu);font-size:12px">Следи за ростом и выбери стратегию</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">📊</div>
-            <div><div style="font-size:13px;font-weight:600">Аналитика</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Прогнозы на 1, 3 и 5 лет вперёд</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">📊</div>
+            <div><div style="font-size:13px;font-weight:600">Аналитика</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Прогнозы на 1, 3 и 5 лет вперёд</div></div>
           </div>
-          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">👤</div>
-            <div><div style="font-size:13px;font-weight:600">Профиль</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Настрой цель, бюджет и уведомления</div></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">👤</div>
+            <div><div style="font-size:13px;font-weight:600">Профиль</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Настрой цель, бюджет, уведомления и тариф</div></div>
           </div>
-          <div style="background:rgba(0,212,100,.08);border:1px solid rgba(0,212,100,.15);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🛡️</div>
-            <div><div style="font-size:13px;font-weight:600">Консерватор</div><div style="font-size:11px;color:var(--mu);margin-top:2px">ОФЗ + дивиденды. Стабильный доход ~11%/год</div></div>
+          <div style="background:rgba(0,212,100,.08);border:1px solid rgba(0,212,100,.2);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🛡️</div>
+            <div><div style="font-size:13px;font-weight:600">Консерватор</div><div style="font-size:11px;color:var(--mu);margin-top:1px">ОФЗ + дивиденды. Стабильный ~11%/год</div></div>
           </div>
-          <div style="background:rgba(108,143,255,.08);border:1px solid rgba(108,143,255,.15);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">⚖️</div>
-            <div><div style="font-size:13px;font-weight:600">Умеренный</div><div style="font-size:11px;color:var(--mu);margin-top:2px">Баланс риска и дохода ~14%/год — популярный выбор</div></div>
+          <div style="background:rgba(108,143,255,.08);border:1px solid rgba(108,143,255,.2);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">⚖️</div>
+            <div><div style="font-size:13px;font-weight:600">Умеренный</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Облигации + акции + фонды. ~14%/год</div></div>
           </div>
-          <div style="background:rgba(255,100,100,.08);border:1px solid rgba(255,100,100,.15);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-            <div style="font-size:24px;flex-shrink:0">🚀</div>
-            <div><div style="font-size:13px;font-weight:600">Агрессивный</div><div style="font-size:11px;color:var(--mu);margin-top:2px">~18%/год. Доступно на тарифе Премиум</div></div>
+          <div style="background:rgba(255,100,100,.08);border:1px solid rgba(255,100,100,.2);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px">
+            <div style="font-size:22px;flex-shrink:0">🚀</div>
+            <div><div style="font-size:13px;font-weight:600">Агрессивный</div><div style="font-size:11px;color:var(--mu);margin-top:1px">Акции роста ~18%/год — доступно на Премиум</div></div>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- Dots + Buttons -->
-    <div style="padding:16px 28px 32px;display:flex;flex-direction:column;align-items:center;gap:14px">
-      <div style="display:flex;gap:8px">
-        <div id="ob-dot-0" style="width:24px;height:6px;border-radius:3px;background:var(--green);transition:.3s"></div>
-        <div id="ob-dot-1" style="width:8px;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);transition:.3s"></div>
-        <div id="ob-dot-2" style="width:8px;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);transition:.3s"></div>
+    <!-- Dots + Кнопки -->
+    <div style="padding:12px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,0.06)">
+      <!-- Dots -->
+      <div style="display:flex;gap:7px;margin-bottom:2px">
+        <div id="ob-dot-0" style="width:24px;height:5px;border-radius:3px;background:var(--green);transition:.3s"></div>
+        <div id="ob-dot-1" style="width:8px;height:5px;border-radius:3px;background:rgba(255,255,255,0.2);transition:.3s"></div>
+        <div id="ob-dot-2" style="width:8px;height:5px;border-radius:3px;background:rgba(255,255,255,0.2);transition:.3s"></div>
       </div>
-      <button id="ob-btn" onclick="obNext()" style="width:100%;max-width:360px;padding:15px;background:linear-gradient(135deg,var(--green),#00A882);border:none;border-radius:14px;color:#000;font-family:var(--serif);font-size:16px;font-weight:800;cursor:pointer">
+      <!-- Главная кнопка -->
+      <button id="ob-btn" onclick="obNext()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#00A882);border:none;border-radius:13px;color:#000;font-family:var(--serif);font-size:15px;font-weight:800;cursor:pointer">
         Далее →
       </button>
-      <span onclick="closeOnboard()" style="font-size:13px;color:var(--hi);cursor:pointer">Пропустить</span>
+      <!-- Нижняя строка: Назад | Пропустить -->
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+        <span id="ob-back-btn" onclick="obBack()" style="font-size:12px;color:var(--hi);cursor:pointer;opacity:0;transition:.2s">← Назад</span>
+        <span onclick="closeOnboard()" style="font-size:12px;color:var(--hi);cursor:pointer">Пропустить</span>
+      </div>
     </div>
 
   </div>
@@ -3278,16 +3284,12 @@ function checkGoalAchieved() {
 
 /* ═══ ONBOARDING ═══ */
 var _obPage=0;
-function obNext(){
-  _obPage++;
-  if(_obPage>=3){closeOnboard();return;}
-  obGoTo(_obPage);
-}
+
 function obGoTo(n){
   _obPage=n;
   var slides=document.querySelectorAll('.ob-slide');
   slides.forEach(function(s,i){
-    s.style.transform='translateX('+(i-n)*100+'%)';
+    s.style.transform='translateX('+((i-n)*100)+'%)';
   });
   // Dots
   for(var i=0;i<3;i++){
@@ -3297,24 +3299,39 @@ function obGoTo(n){
       d.style.background=i===n?'var(--green)':'rgba(255,255,255,0.2)';
     }
   }
-  // Button text
+  // Кнопка Далее/Начать
   var btn=R('ob-btn');
   if(btn)btn.textContent=n===2?'Начать →':'Далее →';
+  // Кнопка Назад — показываем только со 2 страницы
+  var back=R('ob-back-btn');
+  if(back)back.style.opacity=n>0?'1':'0';
 }
+
+function obNext(){
+  if(_obPage>=2){closeOnboard();return;}
+  obGoTo(_obPage+1);
+}
+
+function obBack(){
+  if(_obPage<=0)return;
+  obGoTo(_obPage-1);
+}
+
 function initObSlides(){
+  _obPage=0;
   var slides=document.querySelectorAll('.ob-slide');
   slides.forEach(function(s,i){
-    s.style.position='absolute';
-    s.style.top='0';s.style.left='0';s.style.right='0';s.style.bottom='0';
-    s.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';
-    s.style.transform='translateX('+i*100+'%)';
+    s.style.transform='translateX('+(i*100)+'%)';
   });
-  var cont=R('ob-slides');
-  if(cont)cont.style.position='relative';
+  // Сброс dots
+  obGoTo(0);
   // Свайп
-  var startX=0;
+  var cont=R('ob-slides');
   if(cont){
-    cont.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;},{passive:true});
+    var startX=0;
+    cont.addEventListener('touchstart',function(e){
+      startX=e.touches[0].clientX;
+    },{passive:true});
     cont.addEventListener('touchend',function(e){
       var dx=e.changedTouches[0].clientX-startX;
       if(Math.abs(dx)>50){
